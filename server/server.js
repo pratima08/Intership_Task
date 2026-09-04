@@ -2,20 +2,23 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
+dotenv.config();
+
 const connectDB = require("./config/db");
 
-dotenv.config();
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
-// Connect MongoDB
 connectDB();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Test API
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+
 app.get("/", (req, res) => {
   res.json({
     message: "Backend API is running"
