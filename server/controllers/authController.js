@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/User");
 
+
+// ================= REGISTER =================
+
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -21,15 +24,13 @@ const register = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
-    );
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role: "user"
     });
 
     res.status(201).json({
@@ -38,7 +39,8 @@ const register = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
 
@@ -49,6 +51,9 @@ const register = async (req, res) => {
     });
   }
 };
+
+
+// ================= LOGIN =================
 
 const login = async (req, res) => {
   try {
@@ -68,11 +73,10 @@ const login = async (req, res) => {
       });
     }
 
-    const isPasswordCorrect =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
@@ -82,7 +86,8 @@ const login = async (req, res) => {
 
     const token = jwt.sign(
       {
-        userId: user._id
+        userId: user._id,
+        role: user.role
       },
       process.env.JWT_SECRET,
       {
@@ -98,7 +103,8 @@ const login = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
 
@@ -109,6 +115,7 @@ const login = async (req, res) => {
     });
   }
 };
+
 
 module.exports = {
   register,
