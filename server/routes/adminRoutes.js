@@ -37,11 +37,12 @@ router.get(
 
 // ==================================================
 // DAY 5
-// USER CRUD
+// USER MODULE - CRUD
 // ==================================================
 
 
-// GET ALL USERS
+// 1. GET ALL USERS
+// Admin only
 
 router.get(
   "/users",
@@ -51,7 +52,8 @@ router.get(
 );
 
 
-// GET SINGLE USER
+// 2. GET SINGLE USER
+// Admin only
 
 router.get(
   "/users/:id",
@@ -61,7 +63,8 @@ router.get(
 );
 
 
-// CREATE USER
+// 3. CREATE USER
+// Admin only
 
 router.post(
   "/users",
@@ -71,7 +74,8 @@ router.post(
 );
 
 
-// UPDATE USER
+// 4. UPDATE USER
+// Admin only
 
 router.put(
   "/users/:id",
@@ -81,7 +85,8 @@ router.put(
 );
 
 
-// DELETE USER
+// 5. DELETE USER
+// Admin only
 
 router.delete(
   "/users/:id",
