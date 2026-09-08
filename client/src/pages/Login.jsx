@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
+
   const [formData, setFormData] = useState({
     email: "",
     password: ""
@@ -12,18 +14,27 @@ function Login() {
 
   const navigate = useNavigate();
 
+  // Context API se login function
+  const { login } = useAuth();
+
   const handleChange = (e) => {
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
+
     setMessage("");
 
     try {
+
+      // Backend Login API
       const response = await api.post(
         "/auth/login",
         formData
@@ -31,23 +42,28 @@ function Login() {
 
       const data = response.data;
 
-      localStorage.setItem("token", data.token);
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(data.user)
-      );
+      // Context me user aur token save
+      login(data.user, data.token);
 
       setMessage("Login successful!");
 
+      // Dashboard par redirect
       navigate("/dashboard");
 
     } catch (error) {
 
       if (error.response) {
-        setMessage(error.response.data.message);
+
+        setMessage(
+          error.response.data.message
+        );
+
       } else {
-        setMessage("Unable to connect to server");
+
+        setMessage(
+          "Unable to connect to server"
+        );
+
       }
 
     }
@@ -55,6 +71,7 @@ function Login() {
 
   return (
     <div className="auth-container">
+
       <div className="auth-card">
 
         <h1>Welcome Back</h1>
@@ -62,6 +79,8 @@ function Login() {
         <p>Login to your account</p>
 
         <form onSubmit={handleSubmit}>
+
+          <label>Email</label>
 
           <input
             type="email"
@@ -71,6 +90,8 @@ function Login() {
             onChange={handleChange}
             required
           />
+
+          <label>Password</label>
 
           <input
             type="password"
@@ -95,12 +116,15 @@ function Login() {
 
         <p>
           Don't have an account?{" "}
+
           <Link to="/register">
             Register
           </Link>
+
         </p>
 
       </div>
+
     </div>
   );
 }
