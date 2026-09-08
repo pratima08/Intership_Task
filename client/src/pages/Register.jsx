@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../services/api";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -24,23 +25,12 @@ function Register() {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
-        }
+      const response = await api.post(
+        "/auth/register",
+        formData
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.message);
-        return;
-      }
+      const data = response.data;
 
       setMessage("Registration successful!");
 
@@ -49,7 +39,13 @@ function Register() {
       }, 1000);
 
     } catch (error) {
-      setMessage("Unable to connect to server");
+
+      if (error.response) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage("Unable to connect to server");
+      }
+
     }
   };
 

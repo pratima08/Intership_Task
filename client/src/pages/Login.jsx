@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import api from "../services/api";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -23,25 +24,15 @@ function Login() {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
-        }
+      const response = await api.post(
+        "/auth/login",
+        formData
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage(data.message);
-        return;
-      }
+      const data = response.data;
 
       localStorage.setItem("token", data.token);
+
       localStorage.setItem(
         "user",
         JSON.stringify(data.user)
@@ -52,7 +43,13 @@ function Login() {
       navigate("/dashboard");
 
     } catch (error) {
-      setMessage("Unable to connect to server");
+
+      if (error.response) {
+        setMessage(error.response.data.message);
+      } else {
+        setMessage("Unable to connect to server");
+      }
+
     }
   };
 
