@@ -15,12 +15,19 @@ function Dashboard() {
 
   const navigate = useNavigate();
 
+
+  // =========================
+  // GET PROFILE
+  // =========================
+
   useEffect(() => {
 
     const getProfile = async () => {
 
       if (!token) {
+
         navigate("/login");
+
         return;
       }
 
@@ -35,7 +42,9 @@ function Dashboard() {
           }
         );
 
-        setProfile(response.data);
+        setProfile(
+          response.data
+        );
 
       } catch (error) {
 
@@ -47,9 +56,15 @@ function Dashboard() {
       }
     };
 
+
     getProfile();
 
   }, [token, navigate, logout]);
+
+
+  // =========================
+  // LOGOUT
+  // =========================
 
   const handleLogout = () => {
 
@@ -58,27 +73,73 @@ function Dashboard() {
     navigate("/login");
   };
 
+
+  // =========================
+  // PROFILE
+  // =========================
+
+  const handleProfile = () => {
+
+    navigate("/profile");
+  };
+
+
   return (
     <div className="dashboard-page">
 
-      {/* Header */}
+
+      {/* =========================
+          HEADER
+      ========================= */}
+
       <header className="dashboard-header">
 
         <div>
-          <h1>Dashboard</h1>
-          <p>Welcome to your dashboard</p>
+
+          <h1>
+            Dashboard
+          </h1>
+
+          <p>
+            Welcome to your dashboard
+          </p>
+
         </div>
 
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
+
+        <div className="dashboard-actions">
+
+          <button
+            className="profile-btn"
+            onClick={handleProfile}
+          >
+            Profile
+          </button>
+
+
+          <button
+            className="logout-btn"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+
+          {/* <button
+           onClick={
+            () =>
+             navigate("/products")}>
+            Products
+          </button> */}
+
+        </div>
 
       </header>
 
-      {/* Welcome Section */}
+
+      {/* =========================
+          WELCOME
+      ========================= */}
+
       <section className="welcome-card">
 
         <h2>
@@ -91,12 +152,19 @@ function Dashboard() {
 
       </section>
 
-      {/* User Cards */}
+
+      {/* =========================
+          DASHBOARD CARDS
+      ========================= */}
+
       <section className="dashboard-cards">
+
 
         <div className="dashboard-card">
 
-          <h3>Name</h3>
+          <h3>
+            Name
+          </h3>
 
           <p>
             {user?.name || "N/A"}
@@ -104,9 +172,12 @@ function Dashboard() {
 
         </div>
 
+
         <div className="dashboard-card">
 
-          <h3>Email</h3>
+          <h3>
+            Email
+          </h3>
 
           <p>
             {user?.email || "N/A"}
@@ -114,9 +185,12 @@ function Dashboard() {
 
         </div>
 
+
         <div className="dashboard-card">
 
-          <h3>Role</h3>
+          <h3>
+            Role
+          </h3>
 
           <p>
             {user?.role || "N/A"}
@@ -124,17 +198,26 @@ function Dashboard() {
 
         </div>
 
+
         <div className="dashboard-card">
 
-          <h3>User ID</h3>
+          <h3>
+            User ID
+          </h3>
 
           <p>
-            {profile?.userId || user?.id || "N/A"}
+            {
+              profile?.userId ||
+              user?.id ||
+              "N/A"
+            }
           </p>
 
         </div>
 
+
       </section>
+
 
     </div>
   );

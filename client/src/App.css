@@ -1,12 +1,28 @@
+/* =========================
+   GENERAL
+========================= */
+
 * {
   box-sizing: border-box;
 }
 
-body {
+html,
+body,
+#root {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  padding: 0;
+  min-height: 100%;
 }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+}
+
+
+/* =========================
+   LOGIN / REGISTER
+========================= */
 
 .auth-container {
   min-height: 100vh;
@@ -14,137 +30,243 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  padding: 20px;
+
+  background: #f5f7fb;
 }
 
+
 .auth-card {
-  width: 380px;
+  width: 100%;
+  max-width: 420px;
 
   background: white;
 
   padding: 35px;
 
-  border-radius: 12px;
+  border-radius: 15px;
 
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.1);
+    0 8px 25px rgba(0, 0, 0, 0.12);
 }
+
 
 .auth-card h1 {
+  margin: 0 0 10px;
+
   text-align: center;
-  margin: 0 0 10px 0;
-  font-size: 32px;
-  line-height: 1.2;
+
+  font-size: 30px;
+
+  color: #222;
 }
 
-.auth-card p {
+
+.auth-card > p {
   text-align: center;
+
   color: #666;
+
+  margin: 10px 0;
 }
+
 
 .auth-card form {
   display: flex;
 
   flex-direction: column;
 
-  gap: 15px;
+  gap: 8px;
 
   margin-top: 25px;
 }
 
+
+.auth-card label {
+  font-weight: 600;
+
+  color: #333;
+
+  margin-top: 5px;
+}
+
+
 .auth-card input {
-  padding: 12px;
+  width: 100%;
+
+  padding: 13px;
 
   border: 1px solid #ccc;
 
-  border-radius: 6px;
+  border-radius: 7px;
 
   font-size: 15px;
+
+  outline: none;
 }
 
-.auth-card button,
-.dashboard button {
-  padding: 12px;
+
+.auth-card input:focus {
+  border-color: #007bff;
+
+  box-shadow:
+    0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+
+.auth-card button {
+  width: 100%;
 
   border: none;
 
-  border-radius: 6px;
+  padding: 13px;
+
+  margin-top: 8px;
+
+  border-radius: 7px;
+
+  background: #007bff;
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 600;
 
   cursor: pointer;
-
-  font-size: 15px;
 }
 
+
+.auth-card button:hover {
+  background: #0069d9;
+}
+
+
+.auth-card a {
+  color: #007bff;
+
+  text-decoration: none;
+
+  font-weight: 600;
+}
+
+
+.auth-card a:hover {
+  text-decoration: underline;
+}
+
+
 .message {
+  text-align: center;
+
+  font-weight: 600;
+
   margin-top: 15px;
 }
 
-.dashboard {
-  text-align: center;
 
-  padding-top: 100px;
-}
-
-/* =========================
-   DAY 9 - DASHBOARD
-========================= */
+/* ==================================================
+   DASHBOARD
+================================================== */
 
 .dashboard-page {
   min-height: 100vh;
+
   padding: 30px;
+
   background: #f5f7fb;
-  box-sizing: border-box;
 }
 
-/* Dashboard Header */
+
+/* Header */
 
 .dashboard-header {
+  width: 100%;
   max-width: 1100px;
+
   margin: 0 auto 25px;
 
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
 
   background: white;
+
   padding: 25px;
+
   border-radius: 12px;
 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
 }
+
 
 .dashboard-header h1 {
   margin: 0 0 5px;
+
   font-size: 30px;
 }
 
+
 .dashboard-header p {
   margin: 0;
+
   color: #666;
 }
 
-/* Logout */
 
+/* Dashboard Buttons */
+
+.dashboard-actions {
+  display: flex;
+
+  gap: 10px;
+
+  align-items: center;
+}
+
+
+.profile-btn,
 .logout-btn {
   border: none;
-  padding: 12px 22px;
+
+  padding: 12px 20px;
 
   border-radius: 8px;
 
-  background: #dc3545;
   color: white;
 
   font-size: 15px;
+
   cursor: pointer;
 }
 
+
+.profile-btn {
+  background: #007bff;
+}
+
+
+.logout-btn {
+  background: #dc3545;
+}
+
+
+.profile-btn:hover,
 .logout-btn:hover {
   opacity: 0.9;
 }
 
-/* Welcome Card */
+
+/* Welcome */
 
 .welcome-card {
+  width: 100%;
   max-width: 1100px;
+
   margin: 0 auto 25px;
 
   background: white;
@@ -153,23 +275,31 @@ body {
 
   border-radius: 12px;
 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
 }
+
 
 .welcome-card h2 {
   margin: 0 0 10px;
+
   font-size: 25px;
 }
 
+
 .welcome-card p {
   margin: 0;
+
   color: #666;
 }
+
 
 /* Dashboard Cards */
 
 .dashboard-cards {
+  width: 100%;
   max-width: 1100px;
+
   margin: 0 auto;
 
   display: grid;
@@ -179,6 +309,7 @@ body {
   gap: 20px;
 }
 
+
 .dashboard-card {
   background: white;
 
@@ -186,18 +317,21 @@ body {
 
   border-radius: 12px;
 
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
 
   min-height: 120px;
 }
 
+
 .dashboard-card h3 {
   margin: 0 0 15px;
 
-  font-size: 17px;
-
   color: #666;
+
+  font-size: 17px;
 }
+
 
 .dashboard-card p {
   margin: 0;
@@ -209,60 +343,885 @@ body {
   word-break: break-word;
 }
 
-/* =========================
-   RESPONSIVE DESIGN
-========================= */
 
-/* Tablet */
+/* ==================================================
+   PROFILE
+================================================== */
 
-@media (max-width: 900px) {
+.profile-page {
+  min-height: 100vh;
+
+  padding: 30px;
+
+  background: #f5f7fb;
+}
+
+
+/* Profile Header */
+
+.profile-header {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto 25px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+.profile-header h1 {
+  margin: 0 0 5px;
+
+  font-size: 30px;
+}
+
+
+.profile-header p {
+  margin: 0;
+
+  color: #666;
+}
+
+
+/* Dashboard Button */
+
+.dashboard-btn {
+  border: none;
+
+  padding: 12px 20px;
+
+  border-radius: 8px;
+
+  background: #007bff;
+
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+
+.dashboard-btn:hover {
+  opacity: 0.9;
+}
+
+
+/* ==================================================
+   PROFILE MESSAGES
+================================================== */
+
+.success-message,
+.error-message {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto 20px;
+
+  padding: 15px;
+
+  border-radius: 8px;
+
+  text-align: center;
+
+  font-weight: 600;
+}
+
+
+.success-message {
+  background: #d4edda;
+
+  color: #155724;
+}
+
+
+.error-message {
+  background: #f8d7da;
+
+  color: #721c24;
+}
+
+
+/* ==================================================
+   PROFILE CONTAINER
+================================================== */
+
+.profile-container {
+  width: 100%;
+  max-width: 900px;
+
+  margin: 0 auto;
+
+  display: grid;
+
+  gap: 20px;
+}
+
+
+/* Profile Card */
+
+.profile-card {
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 12px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+
+.profile-card h2 {
+  margin-top: 0;
+
+  margin-bottom: 20px;
+
+  font-size: 22px;
+}
+
+
+/* ==================================================
+   PROFILE INFORMATION
+================================================== */
+
+.profile-info {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 20px;
+}
+
+
+.profile-info div {
+  padding: 15px;
+
+  background: #f5f7fb;
+
+  border-radius: 8px;
+}
+
+
+.profile-info strong {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: #666;
+}
+
+
+.profile-info p {
+  margin: 0;
+
+  font-weight: 600;
+
+  word-break: break-word;
+}
+
+
+/* ==================================================
+   PROFILE FORM
+================================================== */
+
+.profile-card form {
+  display: flex;
+
+  flex-direction: column;
+}
+
+
+.profile-card label {
+  margin-bottom: 7px;
+
+  font-weight: 600;
+}
+
+
+.profile-card input {
+  width: 100%;
+
+  padding: 12px;
+
+  margin-bottom: 15px;
+
+  border: 1px solid #ccc;
+
+  border-radius: 7px;
+
+  font-size: 15px;
+}
+
+
+.profile-card input:focus {
+  outline: none;
+
+  border-color: #007bff;
+}
+
+
+/* ==================================================
+   PROFILE BUTTONS
+================================================== */
+
+.update-btn,
+.password-btn {
+  width: 100%;
+
+  border: none;
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  color: white;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+
+.update-btn {
+  background: #28a745;
+}
+
+
+.password-btn {
+  background: #6f42c1;
+}
+
+
+.update-btn:hover,
+.password-btn:hover {
+  opacity: 0.9;
+}
+
+
+/* ==================================================
+   LARGE DESKTOP
+   1200px and above
+================================================== */
+
+@media (min-width: 1200px) {
+
+  .auth-card {
+    max-width: 450px;
+
+    padding: 40px;
+  }
+
+
+  .dashboard-page {
+    padding: 40px;
+  }
+
+
+  .profile-page {
+    padding: 40px;
+  }
+
+
+  .dashboard-header,
+  .welcome-card {
+    max-width: 1200px;
+  }
+
+
+  .dashboard-cards {
+    max-width: 1200px;
+  }
+
+}
+
+
+/* ==================================================
+   LAPTOP
+   901px - 1199px
+================================================== */
+
+@media (min-width: 901px) and (max-width: 1199px) {
+
+  .dashboard-page {
+    padding: 25px;
+  }
+
 
   .dashboard-cards {
     grid-template-columns: repeat(2, 1fr);
   }
 
+
+  .profile-page {
+    padding: 25px;
+  }
+
 }
 
-/* Mobile */
+
+/* ==================================================
+   TABLET
+   601px - 900px
+================================================== */
+
+@media (min-width: 601px) and (max-width: 900px) {
+
+  /* Login */
+
+  .auth-card {
+    max-width: 420px;
+
+    padding: 30px;
+  }
+
+
+  /* Dashboard */
+
+  .dashboard-page {
+    padding: 20px;
+  }
+
+
+  .dashboard-header {
+    padding: 20px;
+  }
+
+
+  .dashboard-header h1 {
+    font-size: 27px;
+  }
+
+
+  .dashboard-cards {
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+  }
+
+
+  .dashboard-card {
+    padding: 20px;
+  }
+
+
+  /* Profile */
+
+  .profile-page {
+    padding: 20px;
+  }
+
+
+  .profile-header {
+    padding: 20px;
+  }
+
+
+  .profile-info {
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 15px;
+  }
+
+}
+
+
+/* ==================================================
+   MOBILE
+   600px and below
+================================================== */
 
 @media (max-width: 600px) {
+
+  /* =========================
+     LOGIN / REGISTER
+  ========================= */
+
+  .auth-container {
+    min-height: 100vh;
+
+    padding: 15px;
+  }
+
+
+  .auth-card {
+    width: 100%;
+
+    max-width: 100%;
+
+    padding: 25px 20px;
+
+    border-radius: 12px;
+  }
+
+
+  .auth-card h1 {
+    font-size: 25px;
+  }
+
+
+  .auth-card input {
+    padding: 12px;
+
+    font-size: 14px;
+  }
+
+
+  .auth-card button {
+    padding: 12px;
+
+    font-size: 15px;
+  }
+
+
+  /* =========================
+     DASHBOARD
+  ========================= */
 
   .dashboard-page {
     padding: 15px;
   }
+
 
   .dashboard-header {
     padding: 20px;
 
     flex-direction: column;
 
-    align-items: flex-start;
+    align-items: stretch;
 
-    gap: 15px;
+    gap: 20px;
   }
+
 
   .dashboard-header h1 {
     font-size: 25px;
   }
 
+
+  .dashboard-header p {
+    font-size: 14px;
+  }
+
+
+  .dashboard-actions {
+    width: 100%;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+  }
+
+
+  .profile-btn,
   .logout-btn {
     width: 100%;
   }
+
 
   .welcome-card {
     padding: 20px;
   }
 
+
   .welcome-card h2 {
     font-size: 21px;
   }
 
+
+  .welcome-card p {
+    font-size: 14px;
+  }
+
+
   .dashboard-cards {
     grid-template-columns: 1fr;
+
+    gap: 15px;
   }
+
 
   .dashboard-card {
     padding: 20px;
+
+    min-height: auto;
   }
 
+
+  /* =========================
+     PROFILE
+  ========================= */
+
+  .profile-page {
+    padding: 15px;
+  }
+
+
+  .profile-header {
+    padding: 20px;
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+    gap: 15px;
+  }
+
+
+  .profile-header h1 {
+    font-size: 25px;
+  }
+
+
+  .profile-header p {
+    font-size: 14px;
+  }
+
+
+  .dashboard-btn {
+    width: 100%;
+  }
+
+
+  .profile-container {
+    gap: 15px;
+  }
+
+
+  .profile-card {
+    padding: 20px;
+  }
+
+
+  .profile-card h2 {
+    font-size: 20px;
+  }
+
+
+  .profile-info {
+    grid-template-columns: 1fr;
+
+    gap: 12px;
+  }
+
+
+  .profile-info div {
+    padding: 13px;
+  }
+
+
+  .profile-card input {
+    padding: 12px;
+
+    font-size: 14px;
+  }
+
+
+  .update-btn,
+  .password-btn {
+    width: 100%;
+  }
+
+}
+
+
+/* ==================================================
+   VERY SMALL MOBILE
+   400px and below
+================================================== */
+
+@media (max-width: 400px) {
+
+  .auth-card {
+    padding: 20px 15px;
+  }
+
+
+  .auth-card h1 {
+    font-size: 23px;
+  }
+
+
+  .dashboard-page,
+  .profile-page {
+    padding: 10px;
+  }
+
+
+  .dashboard-header,
+  .profile-header {
+    padding: 15px;
+  }
+
+
+  .welcome-card {
+    padding: 15px;
+  }
+
+
+  .dashboard-card,
+  .profile-card {
+    padding: 15px;
+  }
+
+
+  .profile-info div {
+    padding: 12px;
+  }
+
+}
+/* =========================================
+   PRODUCT CRUD
+========================================= */
+
+.products-page {
+  min-height: 100vh;
+  padding: 40px;
+  background: #f5f7fb;
+}
+
+.products-header {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.products-header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.products-header p {
+  margin: 8px 0 0;
+  color: #666;
+}
+
+.back-button {
+  border: none;
+  padding: 11px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #333;
+  color: white;
+  font-size: 14px;
+}
+
+.product-form-card,
+.product-list-card {
+  max-width: 1200px;
+  margin: 0 auto 25px;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+}
+
+.product-form-card h2,
+.product-list-card h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid #ddd;
+  border-radius: 7px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #555;
+}
+
+.form-group textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.product-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.product-form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.product-submit-button,
+.cancel-button {
+  border: none;
+  padding: 11px 20px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.product-submit-button {
+  background: #222;
+  color: white;
+}
+
+.cancel-button {
+  background: #ddd;
+  color: #222;
+}
+
+.success-message,
+.error-message {
+  padding: 11px 14px;
+  border-radius: 7px;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.success-message {
+  background: #e8f7ed;
+  color: #19743a;
+}
+
+.error-message {
+  background: #fdecec;
+  color: #b42318;
+}
+
+.product-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.product-table th,
+.product-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: top;
+}
+
+.product-table th {
+  background: #f7f7f7;
+  font-weight: 600;
+}
+
+.product-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-product-button,
+.delete-product-button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.edit-product-button {
+  background: #eee;
+  color: #222;
+}
+
+.delete-product-button {
+  background: #222;
+  color: white;
+}
+
+.no-products {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+}
+
+
+/* =========================================
+   PRODUCT RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+  .products-page {
+    padding: 25px;
+  }
+
+  .products-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .product-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .products-page {
+    padding: 15px;
+  }
+
+  .product-form-card,
+  .product-list-card {
+    padding: 18px;
+  }
+
+  .products-header h1 {
+    font-size: 24px;
+  }
+
+  .back-button {
+    width: 100%;
+  }
+
+  .product-form-buttons {
+    flex-direction: column;
+  }
+
+  .product-submit-button,
+  .cancel-button {
+    width: 100%;
+  }
 }
