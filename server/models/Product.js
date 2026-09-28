@@ -30,6 +30,11 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0
+    },
+
+    image: {
+      type: String,
+      default: ""
     }
   },
   {
@@ -37,4 +42,7 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model(
+  "Product",
+  productSchema
+);

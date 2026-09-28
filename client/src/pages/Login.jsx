@@ -1,71 +1,103 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../services/api";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContextValue";
 
 function Login() {
-
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Context API se login function
   const { login } = useAuth();
 
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
 
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
     setMessage("");
 
-    try {
+    const email = formData.email.trim();
+    const password = formData.password;
 
-      // Backend Login API
+    // ==========================
+    // VALIDATION
+    // ==========================
+
+    if (!email) {
+      setMessage("Email is required");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setMessage("Please enter a valid email address");
+      return;
+    }
+
+    if (!password) {
+      setMessage("Password is required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage(
+        "Password must be at least 6 characters"
+      );
+      return;
+    }
+
+    // ==========================
+    // LOGIN API
+    // ==========================
+
+    try {
+      setLoading(true);
+
       const response = await api.post(
         "/auth/login",
-        formData
+        {
+          email,
+          password
+        }
       );
 
       const data = response.data;
 
-      // Context me user aur token save
       login(data.user, data.token);
 
       setMessage("Login successful!");
 
-      // Dashboard par redirect
       navigate("/dashboard");
 
     } catch (error) {
+      console.error(error);
 
       if (error.response) {
-
         setMessage(
-          error.response.data.message
+          error.response.data.message ||
+          "Login failed"
         );
-
       } else {
-
         setMessage(
           "Unable to connect to server"
         );
-
       }
 
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,7 +120,7 @@ function Login() {
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleChange}
-            required
+            disabled={loading}
           />
 
           <label>Password</label>
@@ -99,11 +131,16 @@ function Login() {
             placeholder="Enter password"
             value={formData.password}
             onChange={handleChange}
-            required
+            disabled={loading}
           />
 
-          <button type="submit">
-            Login
+          <button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Logging in..."
+              : "Login"}
           </button>
 
         </form>

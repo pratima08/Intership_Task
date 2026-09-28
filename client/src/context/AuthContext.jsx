@@ -1,9 +1,7 @@
-import { createContext, useContext, useState } from "react";
-
-const AuthContext = createContext();
+import { useState } from "react";
+import { AuthContext } from "./AuthContextValue";
 
 export const AuthProvider = ({ children }) => {
-
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
 
@@ -18,7 +16,6 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = (userData, userToken) => {
-
     setUser(userData);
     setToken(userToken);
 
@@ -35,7 +32,6 @@ export const AuthProvider = ({ children }) => {
 
   // Logout function
   const logout = () => {
-
     setUser(null);
     setToken(null);
 
@@ -55,9 +51,4 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-// Custom hook
-export const useAuth = () => {
-  return useContext(AuthContext);
 };

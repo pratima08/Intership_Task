@@ -10,6 +10,7 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -18,39 +19,105 @@ function Register() {
       ...formData,
       [e.target.name]: e.target.value
     });
+
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setMessage("");
 
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const password = formData.password;
+
+    // ==========================
+    // VALIDATION
+    // ==========================
+
+    if (!name) {
+      setMessage("Name is required");
+      return;
+    }
+
+    if (name.length < 3) {
+      setMessage(
+        "Name must be at least 3 characters"
+      );
+      return;
+    }
+
+    if (!email) {
+      setMessage("Email is required");
+      return;
+    }
+
+    if (!email.includes("@")) {
+      setMessage(
+        "Please enter a valid email address"
+      );
+      return;
+    }
+
+    if (!password) {
+      setMessage("Password is required");
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage(
+        "Password must be at least 6 characters"
+      );
+      return;
+    }
+
+    // ==========================
+    // REGISTER API
+    // ==========================
+
     try {
-      const response = await api.post(
+      setLoading(true);
+
+      await api.post(
         "/auth/register",
-        formData
+        {
+          name,
+          email,
+          password
+        }
       );
 
-      const data = response.data;
-
-      setMessage("Registration successful!");
+      setMessage(
+        "Registration successful!"
+      );
 
       setTimeout(() => {
         navigate("/login");
       }, 1000);
 
     } catch (error) {
+      console.error(error);
 
       if (error.response) {
-        setMessage(error.response.data.message);
+        setMessage(
+          error.response.data.message ||
+          "Registration failed"
+        );
       } else {
-        setMessage("Unable to connect to server");
+        setMessage(
+          "Unable to connect to server"
+        );
       }
 
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="auth-container">
+
       <div className="auth-card">
 
         <h1>Create Account</h1>
@@ -59,14 +126,18 @@ function Register() {
 
         <form onSubmit={handleSubmit}>
 
+          <label>Name</label>
+
           <input
             type="text"
             name="name"
             placeholder="Enter your name"
             value={formData.name}
             onChange={handleChange}
-            required
+            disabled={loading}
           />
+
+          <label>Email</label>
 
           <input
             type="email"
@@ -74,8 +145,10 @@ function Register() {
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleChange}
-            required
+            disabled={loading}
           />
+
+          <label>Password</label>
 
           <input
             type="password"
@@ -83,11 +156,16 @@ function Register() {
             placeholder="Enter password"
             value={formData.password}
             onChange={handleChange}
-            required
+            disabled={loading}
           />
 
-          <button type="submit">
-            Register
+          <button
+            type="submit"
+            disabled={loading}
+          >
+            {loading
+              ? "Registering..."
+              : "Register"}
           </button>
 
         </form>
@@ -100,12 +178,15 @@ function Register() {
 
         <p>
           Already have an account?{" "}
+
           <Link to="/login">
             Login
           </Link>
+
         </p>
 
       </div>
+
     </div>
   );
 }

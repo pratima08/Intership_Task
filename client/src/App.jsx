@@ -5,73 +5,122 @@ import {
   Navigate
 } from "react-router-dom";
 
+import { useAuth } from "./context/AuthContextValue";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-
-import "./App.css";
 import Products from "./pages/Products";
 
+import "./App.css";
+
+
+// ==========================
+// PROTECTED ROUTE
+// ==========================
+
+function ProtectedRoute({ children }) {
+
+  const { token } = useAuth();
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+
+// ==========================
+// APP
+// ==========================
 
 function App() {
 
   return (
+
     <BrowserRouter>
 
       <Routes>
 
-        {/* Home */}
+        {/* ==========================
+            PUBLIC ROUTES
+        ========================== */}
+
         <Route
           path="/"
           element={
-            <Navigate to="/login" />
+            <Navigate
+              to="/login"
+              replace
+            />
           }
         />
 
-        {/* Login */}
         <Route
           path="/login"
-          element={
-            <Login />
-          }
+          element={<Login />}
         />
 
-        {/* Register */}
         <Route
           path="/register"
-          element={
-            <Register />
-          }
+          element={<Register />}
         />
 
-        {/* Dashboard */}
+
+        {/* ==========================
+            PROTECTED ROUTES
+        ========================== */}
+
         <Route
           path="/dashboard"
           element={
-            <Dashboard />
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
           }
         />
 
-        {/* Profile */}
         <Route
           path="/profile"
           element={
-            <Profile />
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
           }
         />
-        {/*Products */}
+
         <Route
-         path="/products"
+          path="/products"
           element={
-          <Products />
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
           }
-           />
+        />
+
+
+        {/* ==========================
+            INVALID ROUTE
+        ========================== */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/login"
+              replace
+            />
+          }
+        />
 
       </Routes>
 
     </BrowserRouter>
+
   );
 }
+
 
 export default App;

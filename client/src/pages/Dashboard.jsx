@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContextValue";
 import api from "../services/api";
 
 function Dashboard() {
-
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const {
     user,
@@ -15,23 +16,20 @@ function Dashboard() {
 
   const navigate = useNavigate();
 
-
   // =========================
   // GET PROFILE
   // =========================
 
   useEffect(() => {
-
     const getProfile = async () => {
-
       if (!token) {
-
         navigate("/login");
-
         return;
       }
 
       try {
+        setLoading(true);
+        setError("");
 
         const response = await api.get(
           "/users/profile",
@@ -42,51 +40,92 @@ function Dashboard() {
           }
         );
 
-        setProfile(
-          response.data
-        );
+        setProfile(response.data);
 
       } catch (error) {
-
         console.error(error);
 
-        logout();
+        if (error.response?.status === 401) {
+          logout();
+          navigate("/login");
+          return;
+        }
 
-        navigate("/login");
+        setError(
+          error.response?.data?.message ||
+          "Unable to load dashboard"
+        );
+
+      } finally {
+        setLoading(false);
       }
     };
-
 
     getProfile();
 
   }, [token, navigate, logout]);
-
 
   // =========================
   // LOGOUT
   // =========================
 
   const handleLogout = () => {
-
     logout();
-
     navigate("/login");
   };
-
 
   // =========================
   // PROFILE
   // =========================
 
   const handleProfile = () => {
-
     navigate("/profile");
   };
 
+  // =========================
+  // LOADING
+  // =========================
+
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-loading">
+          <p>Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // ERROR
+  // =========================
+
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-error">
+          <h2>Something went wrong</h2>
+
+          <p>{error}</p>
+
+          <button
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+
+          <button
+            onClick={() => navigate("/login")}
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page">
-
 
       {/* =========================
           HEADER
@@ -95,7 +134,6 @@ function Dashboard() {
       <header className="dashboard-header">
 
         <div>
-
           <h1>
             Dashboard
           </h1>
@@ -103,9 +141,7 @@ function Dashboard() {
           <p>
             Welcome to your dashboard
           </p>
-
         </div>
-
 
         <div className="dashboard-actions">
 
@@ -116,7 +152,6 @@ function Dashboard() {
             Profile
           </button>
 
-
           <button
             className="logout-btn"
             onClick={handleLogout}
@@ -124,17 +159,15 @@ function Dashboard() {
             Logout
           </button>
 
-          {/* <button
-           onClick={
-            () =>
-             navigate("/products")}>
+          <button
+            onClick={() => navigate("/products")}
+          >
             Products
-          </button> */}
+          </button>
 
         </div>
 
       </header>
-
 
       {/* =========================
           WELCOME
@@ -152,58 +185,38 @@ function Dashboard() {
 
       </section>
 
-
       {/* =========================
           DASHBOARD CARDS
       ========================= */}
 
       <section className="dashboard-cards">
 
-
         <div className="dashboard-card">
-
-          <h3>
-            Name
-          </h3>
+          <h3>Name</h3>
 
           <p>
             {user?.name || "N/A"}
           </p>
-
         </div>
 
-
         <div className="dashboard-card">
-
-          <h3>
-            Email
-          </h3>
+          <h3>Email</h3>
 
           <p>
             {user?.email || "N/A"}
           </p>
-
         </div>
 
-
         <div className="dashboard-card">
-
-          <h3>
-            Role
-          </h3>
+          <h3>Role</h3>
 
           <p>
             {user?.role || "N/A"}
           </p>
-
         </div>
 
-
         <div className="dashboard-card">
-
-          <h3>
-            User ID
-          </h3>
+          <h3>User ID</h3>
 
           <p>
             {
@@ -212,12 +225,9 @@ function Dashboard() {
               "N/A"
             }
           </p>
-
         </div>
 
-
       </section>
-
 
     </div>
   );

@@ -1,155 +1,290 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useForm } from "react-hook-form";
+
+import { useAuth } from "../context/AuthContextValue";
 import api from "../services/api";
 
 function Products() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
-
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    category: "",
-    stock: ""
-  });
-
+  const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  // ==========================
-  // GET PRODUCTS
-  // ==========================
-  const fetchProducts = async () => {
-    try {
-      const response = await api.get("/products", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+  // ======================================
+  // CHECK ADMIN
+  // ======================================
 
-      setProducts(response.data.products);
-    } catch (error) {
-      console.error(error);
+  const isAdmin = user?.role === "admin";
 
-      if (error.response?.status === 401) {
-        navigate("/login");
-      }
+  // ======================================
+  // REACT HOOK FORM
+  // ======================================
 
-      setError("Unable to fetch products");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      stock: "",
+      image: null
     }
-  };
+  });
 
+  // ======================================
+  // FETCH PRODUCTS
+  // DAY 26 - AXIOS INTERCEPTOR
+  // ======================================
 
-  useEffect(() => {
+  const fetchProducts = useCallback(async () => {
     if (!token) {
       navigate("/login");
       return;
     }
 
-    fetchProducts();
-  }, [token]);
-
-
-  // ==========================
-  // INPUT CHANGE
-  // ==========================
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-
-  // ==========================
-  // CREATE / UPDATE PRODUCT
-  // ==========================
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    setMessage("");
-    setError("");
-
     try {
-      if (editingId) {
-        // UPDATE
-        const response = await api.put(
-          `/products/${editingId}`,
-          {
-            ...formData,
-            price: Number(formData.price),
-            stock: Number(formData.stock)
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+      setLoading(true);
+      setError("");
 
-        setMessage(response.data.message);
-      } else {
-        // CREATE
-        const response = await api.post(
-          "/products",
-          {
-            ...formData,
-            price: Number(formData.price),
-            stock: Number(formData.stock)
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
+      // Token is automatically added by Axios interceptor
+      const response = await api.get("/products");
 
-        setMessage(response.data.message);
+      setProducts(
+        response.data.products || []
+      );
+
+    } catch (err) {
+      console.error(err);
+
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
       }
 
-      // Reset form
-      setFormData({
-        name: "",
-        description: "",
-        price: "",
-        category: "",
-        stock: ""
-      });
+      setError(
+        err.response?.data?.message ||
+        "Unable to fetch products"
+      );
 
+    } finally {
+      setLoading(false);
+    }
+  }, [token, navigate]);
+
+  // ======================================
+  // LOAD PRODUCTS
+  // ======================================
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProducts = async () => {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        // Token automatically added by interceptor
+        const response = await api.get("/products");
+
+        if (!cancelled) {
+          setProducts(
+            response.data.products || []
+          );
+        }
+
+      } catch (err) {
+        console.error(err);
+
+        if (!cancelled) {
+          if (err.response?.status === 401) {
+            navigate("/login");
+            return;
+          }
+
+          setError(
+            err.response?.data?.message ||
+            "Unable to fetch products"
+          );
+        }
+
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, navigate]);
+
+  // ======================================
+  // ADD / UPDATE PRODUCT
+  // ADMIN ONLY
+  // ======================================
+
+  const onSubmit = async (data) => {
+    if (!isAdmin) {
+      setError("Admin access required");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+
+      setMessage("");
+      setError("");
+
+      const formData = new FormData();
+
+      formData.append(
+        "name",
+        data.name
+      );
+
+      formData.append(
+        "description",
+        data.description
+      );
+
+      formData.append(
+        "price",
+        data.price
+      );
+
+      formData.append(
+        "category",
+        data.category
+      );
+
+      formData.append(
+        "stock",
+        data.stock
+      );
+
+      if (data.image && data.image[0]) {
+        formData.append(
+          "image",
+          data.image[0]
+        );
+      }
+
+      // ======================================
+      // UPDATE PRODUCT
+      // ======================================
+
+      if (editingId) {
+        const response = await api.put(
+          `/products/${editingId}`,
+          formData
+        );
+
+        setMessage(
+          response.data.message ||
+          "Product updated successfully"
+        );
+
+      } else {
+
+        // ======================================
+        // ADD PRODUCT
+        // ======================================
+
+        const response = await api.post(
+          "/products",
+          formData
+        );
+
+        setMessage(
+          response.data.message ||
+          "Product added successfully"
+        );
+      }
+
+      reset();
       setEditingId(null);
 
-      // Refresh products
-      fetchProducts();
-    } catch (error) {
-      console.error(error);
+      await fetchProducts();
 
-      setError(
-        error.response?.data?.message ||
-          "Something went wrong"
-      );
+    } catch (err) {
+      console.error(err);
+
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+
+      if (err.response?.status === 403) {
+        setError("Admin access required");
+      } else {
+        setError(
+          err.response?.data?.message ||
+          "Unable to save product"
+        );
+      }
+
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
-
-  // ==========================
+  // ======================================
   // EDIT PRODUCT
-  // ==========================
+  // ADMIN ONLY
+  // ======================================
+
   const handleEdit = (product) => {
+    if (!isAdmin) {
+      return;
+    }
+
     setEditingId(product._id);
 
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      stock: product.stock
-    });
+    setValue(
+      "name",
+      product.name
+    );
+
+    setValue(
+      "description",
+      product.description
+    );
+
+    setValue(
+      "price",
+      product.price
+    );
+
+    setValue(
+      "category",
+      product.category
+    );
+
+    setValue(
+      "stock",
+      product.stock
+    );
 
     setMessage("");
     setError("");
@@ -160,11 +295,29 @@ function Products() {
     });
   };
 
+  // ======================================
+  // CANCEL EDIT
+  // ======================================
 
-  // ==========================
+  const handleCancelEdit = () => {
+    setEditingId(null);
+
+    reset();
+
+    setMessage("");
+    setError("");
+  };
+
+  // ======================================
   // DELETE PRODUCT
-  // ==========================
+  // ADMIN ONLY
+  // ======================================
+
   const handleDelete = async (id) => {
+    if (!isAdmin) {
+      return;
+    }
+
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this product?"
     );
@@ -174,264 +327,648 @@ function Products() {
     }
 
     try {
+      setDeleteLoading(id);
+
+      setMessage("");
+      setError("");
+
+      // Token automatically added by interceptor
       const response = await api.delete(
-        `/products/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        `/products/${id}`
       );
 
-      setMessage(response.data.message);
+      setMessage(
+        response.data.message ||
+        "Product deleted successfully"
+      );
 
-      fetchProducts();
-    } catch (error) {
-      console.error(error);
+      await fetchProducts();
 
-      setError(
-        error.response?.data?.message ||
+    } catch (err) {
+      console.error(err);
+
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+
+      if (err.response?.status === 403) {
+        setError("Admin access required");
+      } else {
+        setError(
+          err.response?.data?.message ||
           "Unable to delete product"
-      );
+        );
+      }
+
+    } finally {
+      setDeleteLoading(null);
     }
   };
 
+  // ======================================
+  // LOADING
+  // ======================================
 
-  // ==========================
-  // CANCEL EDIT
-  // ==========================
-  const handleCancel = () => {
-    setEditingId(null);
+  if (loading) {
+    return (
+      <div className="products-page">
 
-    setFormData({
-      name: "",
-      description: "",
-      price: "",
-      category: "",
-      stock: ""
-    });
+        <div className="products-loading">
 
-    setMessage("");
-    setError("");
-  };
+          <div className="loading-spinner"></div>
 
+          <p>
+            Loading products...
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // ======================================
+  // UI
+  // ======================================
 
   return (
     <div className="products-page">
 
-      {/* HEADER */}
+      {/* ======================================
+          HEADER
+      ====================================== */}
+
       <div className="products-header">
 
         <div>
-          <h1>Product Management</h1>
-          <p>Manage your products</p>
+
+          <h1>
+            Products
+          </h1>
+
+          <p className="products-subtitle">
+            {isAdmin
+              ? "Manage your products"
+              : "Browse available products"}
+          </p>
+
         </div>
 
-        <button
-          className="back-button"
-          onClick={() => navigate("/dashboard")}
-        >
-          Back to Dashboard
-        </button>
+        <div className="products-header-actions">
+
+          <span
+            className={
+              isAdmin
+                ? "products-role-badge admin"
+                : "products-role-badge user"
+            }
+          >
+            {isAdmin
+              ? "👑 Admin"
+              : "👤 View Only"}
+          </span>
+
+          <button
+            type="button"
+            className="back-dashboard-button"
+            onClick={() =>
+              navigate("/dashboard")
+            }
+          >
+            ← Dashboard
+          </button>
+
+        </div>
 
       </div>
 
+      {/* ======================================
+          SUCCESS MESSAGE
+      ====================================== */}
 
-      {/* FORM */}
-      <div className="product-form-card">
+      {message && (
+        <div className="product-success-message">
+          ✓ {message}
+        </div>
+      )}
 
-        <h2>
-          {editingId ? "Update Product" : "Add Product"}
-        </h2>
+      {/* ======================================
+          ERROR MESSAGE
+      ====================================== */}
 
-        {message && (
-          <div className="success-message">
-            {message}
-          </div>
-        )}
+      {error && (
+        <div className="product-error-message">
+          ⚠ {error}
+        </div>
+      )}
 
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+      {/* ======================================
+          ADMIN PRODUCT FORM
+      ====================================== */}
 
-        <form onSubmit={handleSubmit}>
+      {isAdmin && (
 
-          <div className="form-group">
-            <label>Product Name</label>
+        <div className="product-form-card">
 
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter product name"
-              required
-            />
-          </div>
+          <div className="product-form-header">
 
+            <div>
 
-          <div className="form-group">
-            <label>Description</label>
+              <h2>
+                {editingId
+                  ? "✏️ Update Product"
+                  : "➕ Add New Product"}
+              </h2>
 
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Enter product description"
-              required
-            />
-          </div>
+              <p>
+                {editingId
+                  ? "Update the selected product details"
+                  : "Add a new product to your store"}
+              </p>
 
-
-          <div className="product-form-row">
-
-            <div className="form-group">
-              <label>Price</label>
-
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="Enter price"
-                min="0"
-                required
-              />
             </div>
 
+          </div>
+
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="product-form"
+          >
+
+            {/* NAME */}
 
             <div className="form-group">
-              <label>Category</label>
+
+              <label>
+                Product Name
+              </label>
 
               <input
                 type="text"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                placeholder="Enter category"
-                required
+                placeholder="Enter product name"
+                {...register("name", {
+                  required:
+                    "Product name is required",
+
+                  minLength: {
+                    value: 3,
+                    message:
+                      "Product name must be at least 3 characters"
+                  },
+
+                  maxLength: {
+                    value: 50,
+                    message:
+                      "Product name cannot exceed 50 characters"
+                  }
+                })}
               />
+
+              {errors.name && (
+                <span className="field-error">
+                  {errors.name.message}
+                </span>
+              )}
+
             </div>
 
+            {/* DESCRIPTION */}
 
             <div className="form-group">
-              <label>Stock</label>
 
-              <input
-                type="number"
-                name="stock"
-                value={formData.stock}
-                onChange={handleChange}
-                placeholder="Enter stock"
-                min="0"
-                required
-              />
+              <label>
+                Description
+              </label>
+
+              <textarea
+                placeholder="Enter product description"
+                rows="4"
+                {...register("description", {
+                  required:
+                    "Product description is required",
+
+                  minLength: {
+                    value: 10,
+                    message:
+                      "Description must be at least 10 characters"
+                  },
+
+                  maxLength: {
+                    value: 500,
+                    message:
+                      "Description cannot exceed 500 characters"
+                  }
+                })}
+              ></textarea>
+
+              {errors.description && (
+                <span className="field-error">
+                  {errors.description.message}
+                </span>
+              )}
+
             </div>
 
-          </div>
+            {/* PRICE + STOCK */}
 
+            <div className="form-row">
 
-          <div className="product-form-buttons">
+              <div className="form-group">
 
-            <button
-              type="submit"
-              className="product-submit-button"
-            >
-              {editingId ? "Update Product" : "Add Product"}
-            </button>
+                <label>
+                  Price
+                </label>
 
-            {editingId && (
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter price"
+                  {...register("price", {
+                    required:
+                      "Price is required",
+
+                    min: {
+                      value: 0.01,
+                      message:
+                        "Price must be greater than 0"
+                    }
+                  })}
+                />
+
+                {errors.price && (
+                  <span className="field-error">
+                    {errors.price.message}
+                  </span>
+                )}
+
+              </div>
+
+              <div className="form-group">
+
+                <label>
+                  Stock
+                </label>
+
+                <input
+                  type="number"
+                  placeholder="Enter stock"
+                  {...register("stock", {
+                    required:
+                      "Stock is required",
+
+                    min: {
+                      value: 0,
+                      message:
+                        "Stock cannot be negative"
+                    },
+
+                    validate: (value) =>
+                      Number.isInteger(
+                        Number(value)
+                      ) ||
+                      "Stock must be a whole number"
+                  })}
+                />
+
+                {errors.stock && (
+                  <span className="field-error">
+                    {errors.stock.message}
+                  </span>
+                )}
+
+              </div>
+
+            </div>
+
+            {/* CATEGORY */}
+
+            <div className="form-group">
+
+              <label>
+                Category
+              </label>
+
+              <input
+                type="text"
+                placeholder="Enter category"
+                {...register("category", {
+                  required:
+                    "Category is required"
+                })}
+              />
+
+              {errors.category && (
+                <span className="field-error">
+                  {errors.category.message}
+                </span>
+              )}
+
+            </div>
+
+            {/* IMAGE */}
+
+            <div className="form-group">
+
+              <label>
+
+                Product Image
+
+                {editingId && (
+                  <span className="optional-text">
+                    {" "}
+                    (optional while updating)
+                  </span>
+                )}
+
+              </label>
+
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp"
+                {...register("image", {
+
+                  validate: (files) => {
+
+                    if (
+                      !files ||
+                      !files.length
+                    ) {
+                      return editingId
+                        ? true
+                        : "Product image is required";
+                    }
+
+                    const file = files[0];
+
+                    const allowedTypes = [
+                      "image/jpeg",
+                      "image/png",
+                      "image/webp"
+                    ];
+
+                    if (
+                      !allowedTypes.includes(
+                        file.type
+                      )
+                    ) {
+                      return "Only JPG, JPEG, PNG and WEBP images are allowed";
+                    }
+
+                    if (
+                      file.size >
+                      5 * 1024 * 1024
+                    ) {
+                      return "Image size must be less than 5MB";
+                    }
+
+                    return true;
+                  }
+
+                })}
+              />
+
+              {errors.image && (
+                <span className="field-error">
+                  {errors.image.message}
+                </span>
+              )}
+
+            </div>
+
+            {/* FORM BUTTONS */}
+
+            <div className="product-form-buttons">
+
               <button
-                type="button"
-                className="cancel-button"
-                onClick={handleCancel}
+                type="submit"
+                className="add-product-button"
+                disabled={submitLoading}
               >
-                Cancel
+
+                {submitLoading
+                  ? editingId
+                    ? "Updating..."
+                    : "Adding..."
+                  : editingId
+                    ? "✓ Update Product"
+                    : "＋ Add Product"}
+
               </button>
-            )}
+
+              {editingId && (
+
+                <button
+                  type="button"
+                  className="cancel-product-button"
+                  onClick={handleCancelEdit}
+                  disabled={submitLoading}
+                >
+                  Cancel
+                </button>
+
+              )}
+
+            </div>
+
+          </form>
+
+        </div>
+
+      )}
+
+      {/* ======================================
+          USER VIEW ONLY
+      ====================================== */}
+
+      {!isAdmin && (
+
+        <div className="products-view-only">
+
+          <span>
+            👀
+          </span>
+
+          <div>
+
+            <strong>
+              View Only Mode
+            </strong>
+
+            <p>
+              You can view products, but only
+              administrators can add, update or
+              delete products.
+            </p>
 
           </div>
 
-        </form>
+        </div>
 
-      </div>
+      )}
 
+      {/* ======================================
+          PRODUCT LIST
+      ====================================== */}
 
-      {/* PRODUCT LIST */}
-      <div className="product-list-card">
+      <div className="products-list-card">
 
-        <h2>Product List</h2>
+        <div className="products-list-header">
+
+          <div>
+
+            <h2>
+              Available Products
+            </h2>
+
+            <p>
+              {products.length} product
+              {products.length !== 1
+                ? "s"
+                : ""}{" "}
+              found
+            </p>
+
+          </div>
+
+        </div>
 
         {products.length === 0 ? (
-          <p className="no-products">
-            No products found.
-          </p>
+
+          <div className="products-empty">
+
+            <div className="empty-icon">
+              📦
+            </div>
+
+            <h3>
+              No products found
+            </h3>
+
+            <p>
+              {isAdmin
+                ? "Add your first product using the form above."
+                : "There are no products available right now."}
+            </p>
+
+          </div>
+
         ) : (
 
-          <div className="product-table-wrapper">
+          <div className="products-grid">
 
-            <table className="product-table">
+            {products.map((product) => (
 
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th>Price</th>
-                  <th>Category</th>
-                  <th>Stock</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
+              <div
+                className="product-card"
+                key={product._id}
+              >
 
-              <tbody>
+                {/* IMAGE */}
 
-                {products.map((product) => (
+                <div className="product-image-container">
 
-                  <tr key={product._id}>
+                  {product.image ? (
 
-                    <td>{product.name}</td>
+                    <img
+                      src={`http://localhost:5000${product.image}`}
+                      alt={product.name}
+                      className="product-image"
+                    />
 
-                    <td>{product.description}</td>
+                  ) : (
 
-                    <td>₹{product.price}</td>
+                    <div className="product-no-image">
+                      📦
+                    </div>
 
-                    <td>{product.category}</td>
+                  )}
 
-                    <td>{product.stock}</td>
+                </div>
 
-                    <td>
+                {/* PRODUCT CONTENT */}
 
-                      <div className="product-actions">
+                <div className="product-card-content">
 
-                        <button
-                          className="edit-product-button"
-                          onClick={() => handleEdit(product)}
-                        >
-                          Edit
-                        </button>
+                  <div className="product-card-top">
 
-                        <button
-                          className="delete-product-button"
-                          onClick={() =>
-                            handleDelete(product._id)
-                          }
-                        >
-                          Delete
-                        </button>
+                    <h3>
+                      {product.name}
+                    </h3>
 
-                      </div>
+                    <span className="product-category">
+                      {product.category}
+                    </span>
 
-                    </td>
+                  </div>
 
-                  </tr>
+                  <p className="product-description">
+                    {product.description}
+                  </p>
 
-                ))}
+                  <div className="product-details">
 
-              </tbody>
+                    <div className="product-price">
+                      ₹
+                      {Number(
+                        product.price
+                      ).toFixed(2)}
+                    </div>
 
-            </table>
+                    <div className="product-stock">
+                      Stock: {product.stock}
+                    </div>
+
+                  </div>
+
+                  {/* ADMIN ACTIONS */}
+
+                  {isAdmin && (
+
+                    <div className="product-actions">
+
+                      <button
+                        type="button"
+                        className="edit-product-button"
+                        onClick={() =>
+                          handleEdit(product)
+                        }
+                        disabled={submitLoading}
+                      >
+                        ✏️ Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        className="delete-product-button"
+                        disabled={
+                          deleteLoading ===
+                          product._id ||
+                          submitLoading
+                        }
+                        onClick={() =>
+                          handleDelete(
+                            product._id
+                          )
+                        }
+                      >
+
+                        {deleteLoading ===
+                        product._id
+                          ? "Deleting..."
+                          : "🗑️ Delete"}
+
+                      </button>
+
+                    </div>
+
+                  )}
+
+                </div>
+
+              </div>
+
+            ))}
 
           </div>
 
